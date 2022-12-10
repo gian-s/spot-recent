@@ -12,39 +12,84 @@ async function createRecent(access_token, playlist_name = "RECENTLY PLAYED") {
   await spotifyApi.setAccessToken(access_token);
 
   //getuser id -> get list of playlists -> check if playlist has been created --> if so delete it and create new one --> if not create it
+
   try {
     const user = await spotifyApi.getMe().then((data) => {
-      const res = spotifyApi
-        .getUserPlaylists(data.body.id, { limit: 50 })
-        .then((data) => {
-          const ret = data.body.items.map((item) => {
-            return {
-              id: item.id,
-              name: item.name,
-            };
-          });
-          //console.log(ret);
-          var recent_id = "";
-          for (var i = 0; i < ret.length; i++) {
-            if (ret[i].name === playlist_name) {
-              console.log(ret[i].name);
-              recent_id = ret[i].id;
-              break;
-            }
-          }
-          console.log(recent_id);
-          if (recent_id !== "") {
-            //remove all songs in playlist
-            const track_array = ret.map((item) => {
-              return "spotify:track:".concat(item.id);
-            });
-            console.log(track_array);
-            //spotifyApi.removeTracksFromPlaylist(recent_id,)
-          } else {
-            //create new one
-            console.log("Create PLaylist");
-          }
+      const user_id = data.body.id;
+
+      spotifyApi.getUserPlaylists(user_id, { limit: 50 }).then((data) => {
+        var ret = data.body.items.map((item) => {
+          return {
+            id: item.id,
+            name: item.name,
+          };
         });
+
+        for (var i = 0; i < ret.length; i++) {
+          var recent_idp = "";
+          if (ret[i].name === playlist_name) {
+            recent_idp = ret[i].id;
+            console.log(ret[i].name);
+            console.log(playlist_name);
+
+            break;
+          } else {
+          }
+        }
+
+        try {
+          spotifyApi
+            .getMyRecentlyPlayedTracks({
+              limit: 50,
+            })
+            .then((data) => {
+              const track_array = data.body.items.map((item) => {
+                return "spotify:track:".concat(item.track.id);
+              });
+              console.log(track_array);
+
+              if (recent_idp !== "") {
+                try {
+                  spotifyApi
+                    .getPlaylistTracks(recent_idp, { limit: 50 })
+                    .then((data) => {
+                      const recent_array = data.body.items.map((item) => {
+                        return { uri: "spotify:track:".concat(item.track.id) };
+                      });
+
+                      console.log(recent_array);
+                      spotifyApi
+                        .removeTracksFromPlaylist(recent_idp, recent_array)
+                        .then((data) => {
+                          spotifyApi.addTracksToPlaylist(
+                            recent_idp,
+                            track_array
+                          );
+                        });
+                    });
+                } catch (error) {
+                  console.log(error);
+                }
+              } else {
+                console.log("create new playlist");
+                spotifyApi
+                  .createPlaylist(playlist_name, {
+                    collaborative: false,
+                    public: true,
+                  })
+                  .then((data) => {
+                    recent_idp = data.body.id;
+                    console.log(recent_idp);
+                    spotifyApi.addTracksToPlaylist(recent_idp, track_array);
+                  });
+              }
+            });
+        } catch (error) {
+          console.log(error);
+        }
+      });
+
+      //create new set of recently played tracks/use it to populate new playlist
     });
   } catch (error) {
     console.log("Error getting user");
@@ -52,7 +97,7 @@ async function createRecent(access_token, playlist_name = "RECENTLY PLAYED") {
   }
 }
 
-async function getData(access_token, playlist_name = "RECENTLY PLAYED TRACKS") {
+async function getData(access_token, playlist_name = "RECENTLY PLAYED") {
   //return
   await createRecent(access_token, playlist_name); //creates playlist
 
