@@ -22,7 +22,7 @@ export default function Dashboard({ code }) {
 
   return (
     <div>
-      <h1>{accessToken}</h1>
+      <h1>You have succesfully logged in!</h1>
     </div>
   );
 }
