@@ -3,6 +3,100 @@ require("dotenv").config();
 const pathToenvFile = "../.env";
 require("dotenv").config({ path: pathToenvFile });
 
+async function getRecentPlaylist(access_token, playlist_name) {
+  const spotifyApi = new SpotifyWebApi({
+    redirectUri: process.env.REACT_APP_REDIRECT_URI,
+    clientId: process.env.REACT_APP_CLIENT_ID,
+    clientSecret: process.env.REACT_APP_CLIENT_SECRET,
+  });
+
+  await spotifyApi.setAccessToken(access_token);
+
+  const user_id = await spotifyApi.getMe();
+
+  const current_playlists = await spotifyApi.getUserPlaylists(user_id.body.id, {
+    limit: 50,
+  });
+
+  var ret = current_playlists.body.items.map((item) => {
+    return {
+      id: item.id,
+      name: item.name,
+    };
+  });
+
+  for (var i = 0; i < ret.length; i++) {
+    var recent_id = "";
+    if (ret[i].name === playlist_name) {
+      recent_id = ret[i].id;
+      console.log(ret[i].name);
+      console.log(recent_id);
+      return recent_id;
+    }
+  }
+  console.log("recent id is blank");
+  console.log(recent_id);
+  return recent_id;
+}
+
+async function checkRecentPlaylist(access_token, playlist_name, recent_id) {
+  const spotifyApi = new SpotifyWebApi({
+    redirectUri: process.env.REACT_APP_REDIRECT_URI,
+    clientId: process.env.REACT_APP_CLIENT_ID,
+    clientSecret: process.env.REACT_APP_CLIENT_SECRET,
+  });
+
+  await spotifyApi.setAccessToken(access_token);
+
+  if (recent_id !== "") {
+    //remove all songs
+    const toRemove = await spotifyApi.getPlaylistTracks(recent_id, {
+      limit: 50,
+    });
+    console.log(toRemove);
+    const toRemove_array = toRemove.body.items.map((item) => {
+      return { uri: "spotify:track:".concat(item.track.id) };
+    });
+    console.log(toRemove_array);
+    await spotifyApi.removeTracksFromPlaylist(recent_id, toRemove_array);
+    return recent_id;
+  } else {
+    console.log("create new playlist");
+    const newPlaylist = await spotifyApi.createPlaylist(playlist_name, {
+      collaborative: false,
+      public: true,
+    });
+    return newPlaylist.body.id;
+  }
+}
+
+async function addRecentTracks(access_token, recent_id) {
+  const spotifyApi = new SpotifyWebApi({
+    redirectUri: process.env.REACT_APP_REDIRECT_URI,
+    clientId: process.env.REACT_APP_CLIENT_ID,
+    clientSecret: process.env.REACT_APP_CLIENT_SECRET,
+  });
+  await spotifyApi.setAccessToken(access_token);
+
+  const recentTracks = await spotifyApi.getMyRecentlyPlayedTracks({
+    limit: 50,
+  });
+  console.log(recentTracks);
+
+  const recentArray = recentTracks.body.items.map((item) => {
+    return "spotify:track:".concat(item.track.id);
+  });
+  console.log(recentArray);
+
+  try {
+    spotifyApi.addTracksToPlaylist(recent_id, recentArray);
+    console.log("Tracks Have been Added");
+    return recentArray;
+  } catch (error) {
+    console.log(error);
+  }
+}
+
 async function createRecent(access_token, playlist_name = "RECENTLY PLAYED") {
   const spotifyApi = new SpotifyWebApi({
     redirectUri: process.env.REACT_APP_REDIRECT_URI,
@@ -99,7 +193,9 @@ async function createRecent(access_token, playlist_name = "RECENTLY PLAYED") {
 
 async function getData(access_token, playlist_name = "RECENTLY PLAYED") {
   //return
-  await createRecent(access_token, playlist_name); //creates playlist
+  var recent_id = await getRecentPlaylist(access_token, playlist_name); //creates playlist
+  recent_id = await checkRecentPlaylist(access_token, playlist_name, recent_id);
+  const newTrack = await addRecentTracks(access_token, recent_id);
 
   //get playlist-id
 }
