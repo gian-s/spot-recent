@@ -16,5 +16,7 @@ lerna-debug.log*
 
 ./app/.env
 
-./node_modules/
-./server/node_modules/
+./app/node_modules
+
+./app/server/node_modules
+node_modules/
