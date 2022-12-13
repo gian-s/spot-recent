@@ -6,7 +6,7 @@ const bodyParser = require("body-parser");
 const { parse, stringify } = require("envfile");
 const pathToenvFile = "../.env";
 const asyncHandler = require("express-async-handler");
-const { getData } = require("./get_data");
+const { createRecentPlaylist } = require("./get_data");
 require("dotenv").config({ path: pathToenvFile });
 const app = express();
 app.use(cors());
@@ -76,7 +76,7 @@ app.post(
         refreshToken: data.body.refresh_token,
         expiresIn: data.body.expires_in,
       });
-      const ret = getData(data.body.access_token);
+      const ret = createRecentPlaylist(data.body.access_token);
       console.log(ret);
     });
   })
