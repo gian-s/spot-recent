@@ -4,7 +4,7 @@ const cors = require("cors");
 const SpotifyWebApi = require("spotify-web-api-node");
 const bodyParser = require("body-parser");
 const { parse, stringify } = require("envfile");
-const pathToenvFile = "../.env";
+const pathToenvFile = "./.env";
 const asyncHandler = require("express-async-handler");
 const { createRecentPlaylist } = require("./get_data");
 require("dotenv").config({ path: pathToenvFile });
@@ -105,4 +105,6 @@ app.post("/refresh", (req, res) => {
     });
 });
 
-app.listen(3001);
+var listener = app.listen(3001, function () {
+  console.log("Listening on port " + listener.address().port); //Listening on port 8888
+});
