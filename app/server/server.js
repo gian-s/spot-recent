@@ -70,14 +70,25 @@ app.post(
 
     const code = req.body.code;
     spotifyApi.authorizationCodeGrant(code).then((data) => {
-      console.log(data.body.access_token);
+      //console.log(data.body.access_token);
       res.json({
         accessToken: data.body.access_token,
         refreshToken: data.body.refresh_token,
         expiresIn: data.body.expires_in,
       });
-      const ret = createRecentPlaylist(data.body.access_token);
-      console.log(ret);
+    });
+  })
+);
+
+app.post(
+  "/recently-played",
+  asyncHandler(async (req, res) => {
+    console.log(req.body.accessToken);
+    const access_token = req.body.accessToken;
+    var recent_tracks = await createRecentPlaylist(access_token);
+    console.log(recent_tracks);
+    res.json({
+      recentTracks: recent_tracks,
     });
   })
 );

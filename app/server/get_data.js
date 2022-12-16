@@ -82,12 +82,12 @@ async function addRecentTracks(access_token, recent_id) {
   const recentTracks = await spotifyApi.getMyRecentlyPlayedTracks({
     limit: 50,
   });
-  console.log(recentTracks);
+  //console.log(recentTracks);
 
   const recentArray = recentTracks.body.items.map((item) => {
     return "spotify:track:".concat(item.track.id);
   });
-  console.log(recentArray);
+  //console.log(recentArray);
 
   try {
     spotifyApi.addTracksToPlaylist(recent_id, recentArray);
@@ -107,7 +107,7 @@ async function createRecentPlaylist(
   recent_id = await checkRecentPlaylist(access_token, playlist_name, recent_id);
   const newTrack = await addRecentTracks(access_token, recent_id);
 
-  //get playlist-id
+  return newTrack;
 }
 //get playlist id  --> get recently played tracks --> add tracks to given playlist id
 //   await spotifyApi
