@@ -20,3 +20,5 @@ lerna-debug.log*
 
 ./app/server/node_modules
 node_modules/
+
+notes.md
