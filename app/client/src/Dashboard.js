@@ -1,13 +1,6 @@
 import { useState, useEffect } from "react";
 import useAuth from "./useAuth";
-import SpotifyWebApi from "spotify-web-api-node";
 import axios from "axios";
-
-const spotifyApi = new SpotifyWebApi({
-  redirectUri: process.env.REACT_APP_REDIRECT_URI,
-  clientId: process.env.REACT_APP_CLIENT_ID,
-  clientSecret: process.env.REACT_APP_CLIENT_SECRET,
-});
 
 export default function Dashboard({ code }) {
   const accessToken = useAuth(code);
@@ -16,17 +9,19 @@ export default function Dashboard({ code }) {
 
   useEffect(() => {
     if (!accessToken) return;
-    spotifyApi.setAccessToken(accessToken);
-    axios
-      .post("http://localhost:3001/recently-played", {
-        accessToken,
-      })
-      .then((res) => {
-        console.log(res);
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+    const interval = setInterval(() => {
+      axios
+        .post("http://localhost:3001/recently-played", {
+          accessToken,
+        })
+        .then((res) => {
+          //console.log(res.data);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    }, 60000); //every 5 min
+    return () => clearInterval(interval);
   }, [accessToken]);
 
   //console.log(playlists);
