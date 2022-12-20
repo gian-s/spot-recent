@@ -4,9 +4,11 @@ const cors = require("cors");
 const SpotifyWebApi = require("spotify-web-api-node");
 const bodyParser = require("body-parser");
 const { parse, stringify } = require("envfile");
-const pathToenvFile = "./.env";
+const pathToenvFile = "../client/.env";
 const asyncHandler = require("express-async-handler");
-const { createRecentPlaylist } = require("./get_data");
+const { createRecentPlaylist } = require("./getRecent");
+const { getPlayback } = require("./getPlaybackState");
+
 require("dotenv").config({ path: pathToenvFile });
 const app = express();
 app.use(cors());
@@ -76,6 +78,9 @@ app.post(
         refreshToken: data.body.refresh_token,
         expiresIn: data.body.expires_in,
       });
+
+      const playback = getPlayback(data.body.access_token);
+      //console.log(data.body.expires_in);
     });
   })
 );
@@ -83,7 +88,7 @@ app.post(
 app.post(
   "/recently-played",
   asyncHandler(async (req, res) => {
-    console.log(req.body.accessToken);
+    //console.log(req.body.accessToken);
     const access_token = req.body.accessToken;
     var recent_tracks = await createRecentPlaylist(access_token);
     console.log(recent_tracks);
@@ -104,7 +109,7 @@ app.post("/refresh", (req, res) => {
   spotifyApi
     .refreshAccessToken()
     .then((data) => {
-      console.log(data.body);
+      //console.log(data.body);
       res.json({
         accessToken: data.body.accessToken,
         expiresIn: data.body.expiresIn,
