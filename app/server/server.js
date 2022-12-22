@@ -8,6 +8,7 @@ const pathToenvFile = "../client/.env";
 const asyncHandler = require("express-async-handler");
 const { createRecentPlaylist } = require("./getRecent");
 const { getPlayback } = require("./getPlaybackState");
+const mysql = require("mysql");
 
 require("dotenv").config({ path: pathToenvFile });
 const app = express();
@@ -60,6 +61,36 @@ function setEnv(key, value) {
 //Calls function and sets environment variables needed to call Spotify's API
 setEnv("REACT_APP_APP_URL", authorizeURL);
 
+const db = mysql.createConnection({
+  host: "127.0.0.1",
+  user: "root",
+  password: "password",
+  port: "3306",
+});
+
+db.connect((err) => {
+  if (err) {
+    //console.log(err);
+    throw err;
+  }
+
+  console.log("MySQL Connected...");
+});
+//create database
+app.get("/createdb", (req, res) => {
+  let sql = "CREATE DATABASE spotrecent";
+
+  db.query(sql, (err, result) => {
+    if (err) throw err;
+    console.log(result);
+    res.send("database created...");
+  });
+});
+//create table
+// app.get('/createtable',(req,res)=>{
+//   let sql = 'CREATE TABLE tracks()';
+// })
+
 //Handles login route
 app.post(
   "/login",
@@ -79,7 +110,7 @@ app.post(
         expiresIn: data.body.expires_in,
       });
 
-      const playback = getPlayback(data.body.access_token);
+      //const playback = getPlayback(data.body.access_token);
       //console.log(data.body.expires_in);
     });
   })
@@ -89,11 +120,35 @@ app.post(
   "/recently-played",
   asyncHandler(async (req, res) => {
     //console.log(req.body.accessToken);
-    const access_token = req.body.accessToken;
-    var recent_tracks = await createRecentPlaylist(access_token);
-    console.log(recent_tracks);
+    console.log(req.body.state.position);
+    // const access_token = req.body.accessToken;
+    // var recent_tracks = await createRecentPlaylist(access_token);
+    // console.log(recent_tracks);
+
+    if (
+      req.body.state != null &&
+      !req.body.state.paused &&
+      req.body.state.position <= 10
+    ) {
+      curr_track = req.body.state.track_window.current_track;
+      //console.log(curr_track);
+      //add song to database
+      entry = {
+        id: req.body.state.track_window.current_track.id,
+        uri: req.body.state.track_window.current_track.uri,
+        name: req.body.state.track_window.current_track.name,
+        artists: req.body.state.track_window.current_track.artists
+          .map((item) => {
+            return item.name;
+          })
+          .join(","),
+        album: req.body.state.track_window.current_track.album.name,
+        album_uri: req.body.state.track_window.current_track.album.name,
+      };
+      console.log(entry);
+    }
     res.json({
-      recentTracks: recent_tracks,
+      message: "State Change",
     });
   })
 );
