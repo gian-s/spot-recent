@@ -17,6 +17,8 @@ async function getPlayback(access_token) {
   } catch (error) {
     console.log(error);
   }
+
+  //ping spotify server check if music is playing, if playing add song details to sql table
 }
 
 module.exports = {
