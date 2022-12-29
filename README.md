@@ -18,3 +18,8 @@ You will need your client_id and client_secret to use the application
 5. Playlist will be created and if already is created will be updated!
 
 Fully Functional Web App coming soon !!!
+
+
+# Listening on your devices
+If you listen to 50% of a song then it should be included in your history, someitmes spotify's own history feature
+or even spotify wrapped seems wildly inaccurate. This application is an attempt at trying to take ownership of your listening data. 
