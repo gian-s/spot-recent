@@ -68,30 +68,31 @@ const db = mysql.createConnection({
   port: "3306",
 });
 
-db.connect((err) => {
-  if (err) {
-    //console.log(err);
-    throw err;
-  }
+// db.connect((err) => {
+//   if (err) {
+//     //console.log(err);
+//     throw err;
+//   }
 
-  console.log("MySQL Connected...");
-});
-//create database
-app.get("/createdb", (req, res) => {
-  let sql = "CREATE DATABASE spotrecent";
+//   console.log("MySQL Connected...");
+// });
+// //create database
+// app.get("/createdb", (req, res) => {
+//   let sql = "CREATE DATABASE spotrecent";
 
-  db.query(sql, (err, result) => {
-    if (err) throw err;
-    console.log(result);
-    res.send("database created...");
-  });
-});
+//   db.query(sql, (err, result) => {
+//     if (err) throw err;
+//     console.log(result);
+//     res.send("database created...");
+//   });
+// });
 //create table
 // app.get('/createtable',(req,res)=>{
 //   let sql = 'CREATE TABLE tracks()';
 // })
 
 //Handles login route
+
 app.post(
   "/login",
   asyncHandler(async (req, res) => {
@@ -116,39 +117,99 @@ app.post(
   })
 );
 
+var stack = [];
+
 app.post(
   "/recently-played",
   asyncHandler(async (req, res) => {
     //console.log(req.body.accessToken);
-    console.log(req.body.state.position);
-    // const access_token = req.body.accessToken;
+    //console.log(req.body);
+    const access_token = req.body.accessToken;
     // var recent_tracks = await createRecentPlaylist(access_token);
-    // console.log(recent_tracks);
+    // console.log(recent_tracks)
+    const state = await getPlayback(access_token);
+    console.log(state);
 
-    if (
-      req.body.state != null &&
-      !req.body.state.paused &&
-      req.body.state.position <= 10
-    ) {
-      curr_track = req.body.state.track_window.current_track;
-      //console.log(curr_track);
-      //add song to database
-      entry = {
-        id: req.body.state.track_window.current_track.id,
-        uri: req.body.state.track_window.current_track.uri,
-        name: req.body.state.track_window.current_track.name,
-        artists: req.body.state.track_window.current_track.artists
-          .map((item) => {
-            return item.name;
-          })
-          .join(","),
-        album: req.body.state.track_window.current_track.album.name,
-        album_uri: req.body.state.track_window.current_track.album.name,
-      };
-      console.log(entry);
+    // if status code is good and not paused and past a certain percentage of the song
+    // if status code is good and paused then do nothing if status code is not good then do nothing either
+    if (state.statusCode === 200 && state.is_playing === true) {
+      //create an array
+      //push the percentage of the song that has been completed
+
+      //base case when server is starting up again
+      if (stack.length === 0) {
+        //if stack is empty just push to array
+        stack.push({
+          id: state.id,
+          progress: state.progress,
+          progress_ms: state.progress_ms,
+          added: false,
+        });
+        stack.push({
+          id: state.id,
+          progress: state.progress,
+          progress_ms: state.progress_ms,
+          added: false,
+        });
+      }
+
+      //new song
+      if (stack[1].id === state.id) {
+        //same song keep playing
+
+        if (stack[1].progress > state.progress) {
+          //this means that someon scrubbed back
+          //then we want to set back
+          stack[0].progress = state.progress;
+          stack[1].progress = state.progress;
+          stack[0].progress_ms = state.progress_ms;
+          stack[1].progress_ms = state.progress_ms;
+          stack[0].added = false;
+          stack[1].added = false;
+        } else if (state.progress_ms > stack[1].progress_ms + 10500) {
+          stack[0].progress = state.progress;
+          stack[1].progress = state.progress;
+          stack[0].added = false;
+          stack[1].added = false;
+        } else {
+          stack[1].id = state.id;
+          stack[1].progress = state.progress;
+          stack[1].progress_ms = state.progress_ms;
+        }
+      } else if (stack[1].id !== state.id) {
+        //new song we want to clear our stack and update it with new song info
+        stack.length = 0;
+        stack.push({
+          id: state.id,
+          progress: state.progress,
+          progress_ms: state.progress_ms,
+          added: false,
+        });
+        stack.push({
+          id: state.id,
+          progress: state.progress,
+          progress_ms: state.progress_ms,
+          added: false,
+        });
+      }
+
+      if (stack[1].progress - stack[0].progress > 0.45 && !stack[1].added) {
+        stack[1].added = true;
+        console.log("add to SQL Database");
+      }
+      // if the song is the same, and the current progress is what the song would be like after prev_progress + 30 sec
+      // then we know that the song was repeated
+      // or more like if the previous song was already past the threshold and then the song goes again but the progress goes back
+      // and is past the threshold but before another threshold then it should count again
+      // I'm not really one that repeats songs over and over again but i do play songs multiple times in one session
+      // theres many ways of thinking about how a song should count as a valid "play" and this would add to how accurate your spotify recap would be
+      // }
+      console.log(stack);
+    } else {
+      console.log(state);
     }
     res.json({
-      message: "State Change",
+      message: "Getting Current Track",
     });
   })
 );
