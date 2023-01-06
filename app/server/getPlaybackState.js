@@ -15,7 +15,7 @@ async function getPlayback(access_token) {
     const playback = await spotifyApi.getMyCurrentPlaybackState();
     //console.log(playback);
     if (playback.statusCode == 200) {
-      var datetime = new Date();
+      //var datetime = new Date();
       var entry = {
         statusCode: playback.statusCode,
         is_playing: playback.body.is_playing,
@@ -36,7 +36,6 @@ async function getPlayback(access_token) {
         album_id: playback.body.item.album.uri,
         album_name: playback.body.item.album.name,
         track_img: playback.body.item.album.images[0].url,
-        date_played: datetime,
       };
     } else {
       var entry = { statusCode: playback.statusCode };
