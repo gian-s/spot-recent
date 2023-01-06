@@ -1,5 +1,5 @@
 # spot-recent
-Small Web App to Create/Update a playlist of your 50 most recently played tracks
+Small Web App to keep track of your spotify listening history. Keep track of listening history and get metrics like spotify wrapped accessible throughout the year
 
 
 # About the Spotify API
