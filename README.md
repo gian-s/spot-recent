@@ -1,6 +1,5 @@
 # spot-recent
-Small Web App to keep track of your spotify listening history. Keep track of listening history and get metrics like spotify wrapped accessible throughout the year
-
+Small web app to keep track of your spotify listening history. Connect a SQL database to store information.
 
 # About the Spotify API
 
