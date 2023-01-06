@@ -61,18 +61,22 @@ function setEnv(key, value) {
 //Calls function and sets environment variables needed to call Spotify's API
 setEnv("REACT_APP_APP_URL", authorizeURL);
 
-const db = mysql.createConnection({
-  host: "127.0.0.1",
-  user: "root",
-  password: "password",
-  port: "3306",
+var connection = mysql.createConnection({
+  host: process.env.RDS_HOSTNAME,
+  user: process.env.RDS_USERNAME,
+  password: process.env.RDS_PASSWORD,
 });
 
-// db.connect((err) => {
-//   if (err) {
-//     //console.log(err);
-//     throw err;
-//   }
+connection.connect(function (err) {
+  if (err) {
+    console.error("Database connection failed: " + err.stack);
+    return;
+  }
+
+  console.log("Connected to database.");
+});
+
+connection.end();
 
 //   console.log("MySQL Connected...");
 // });
@@ -205,6 +209,9 @@ app.post(
       // theres many ways of thinking about how a song should count as a valid "play" and this would add to how accurate your spotify recap would be
       // }
       console.log(stack);
+    } else if (state.statusCode === 200 && state.is_playing === false) {
+      stack[1].progress = state.progress;
+      stack[1].progress_ms = state.progress_ms;
     } else {
       console.log(state);
     }
