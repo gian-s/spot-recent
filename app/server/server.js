@@ -197,7 +197,7 @@ app.post(
         });
       }
 
-      if (stack[1].progress - stack[0].progress > 0.45 && !stack[1].added) {
+      if (stack[1].progress - stack[0].progress > 0.3 && !stack[1].added) {
         stack[1].added = true;
         console.log("add to SQL Database");
       }
@@ -209,15 +209,17 @@ app.post(
       // theres many ways of thinking about how a song should count as a valid "play" and this would add to how accurate your spotify recap would be
       // }
       console.log(stack);
-    } else if (state.statusCode === 200 && state.is_playing === false) {
+    } else if (
+      state.statusCode === 200 &&
+      state.is_playing === false &&
+      stack.length === 2
+    ) {
       stack[1].progress = state.progress;
       stack[1].progress_ms = state.progress_ms;
     } else {
       console.log(state);
     }
-    res.json({
-      message: "Getting Current Track",
-    });
+    res.json(state);
   })
 );
 

@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react";
 import useAuth from "./useAuth";
 import axios from "axios";
+import "./Dashboard.css";
 
 export default function Dashboard({ code }) {
   const accessToken = useAuth(code);
   //const [playlists, setPlaylists] = useState([]);
   //const [tracks, setTracks] = useState({});
-
+  const [currTrack, setcurrTrack] = useState("");
   useEffect(() => {
     if (!accessToken) return;
     const interval = setInterval(() => {
@@ -15,20 +16,22 @@ export default function Dashboard({ code }) {
           accessToken,
         })
         .then((res) => {
-          //console.log(res.data);
+          console.log(res.data);
+          setcurrTrack(res.data.track_img);
         })
         .catch((error) => {
           console.log(error);
         });
     }, 10000); //every 5 min
     return () => clearInterval(interval);
-  }, [accessToken]);
+  }, [accessToken, currTrack]);
 
   //console.log(playlists);
+  //const alt_img
 
   return (
-    <div>
-      <h1>YOU HAVE LOGGED IN !!!</h1>
+    <div className="centered">
+      <img src={currTrack} alt="track" height={450} width={450} />
     </div>
   );
 }
