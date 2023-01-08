@@ -191,6 +191,7 @@ app.post(
         });
       }
 
+
       if (stack[1].progress - stack[0].progress > 0.35 && !stack[1].added) {
         stack[1].added = true;
         toInsert = {
@@ -227,9 +228,7 @@ app.post(
     } else {
       console.log(state);
     }
-    res.json({
-      message: "Getting Current Track",
-    });
+    res.json(state);
   })
 );
 
