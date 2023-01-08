@@ -61,23 +61,17 @@ function setEnv(key, value) {
 //Calls function and sets environment variables needed to call Spotify's API
 setEnv("REACT_APP_APP_URL", authorizeURL);
 
-var connection = mysql.createConnection({
+var con = mysql.createConnection({
   host: process.env.RDS_HOSTNAME,
   user: process.env.RDS_USERNAME,
   password: process.env.RDS_PASSWORD,
+  database: process.env.RDS_NAME,
 });
 
-connection.connect(function (err) {
-  if (err) {
-    console.error("Database connection failed: " + err.stack);
-    return;
-  }
-
-  console.log("Connected to database.");
+con.connect(function (err) {
+  if (err) throw err;
+  console.log("Connected!");
 });
-
-connection.end();
-
 //   console.log("MySQL Connected...");
 // });
 // //create database
@@ -197,9 +191,23 @@ app.post(
         });
       }
 
-      if (stack[1].progress - stack[0].progress > 0.45 && !stack[1].added) {
+      if (stack[1].progress - stack[0].progress > 0.35 && !stack[1].added) {
         stack[1].added = true;
-        console.log("add to SQL Database");
+        toInsert = {
+          trackId: state.id,
+          artists: state.artists,
+          trackName: state.name,
+          trackDuration: state.duration_ms,
+          albumId: state.album_id,
+          albumName: state.album_name,
+          trackImg: state.track_img,
+        };
+
+        var sql = "INSERT INTO recentlyPlayed SET ?";
+        con.query(sql, toInsert, function (err, result) {
+          if (err) throw err;
+          console.log("1 record inserted");
+        });
       }
       // if the song is the same, and the current progress is what the song would be like after prev_progress + 30 sec
       // then we know that the song was repeated
@@ -209,7 +217,11 @@ app.post(
       // theres many ways of thinking about how a song should count as a valid "play" and this would add to how accurate your spotify recap would be
       // }
       console.log(stack);
-    } else if (state.statusCode === 200 && state.is_playing === false) {
+    } else if (
+      state.statusCode === 200 &&
+      state.is_playing === false &&
+      stack.length === 2
+    ) {
       stack[1].progress = state.progress;
       stack[1].progress_ms = state.progress_ms;
     } else {
