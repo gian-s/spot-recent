@@ -33,7 +33,7 @@ async function getPlayback(access_token) {
         ),
         progress_ms: playback.body.progress_ms,
         duration_ms: playback.body.item.duration_ms,
-        album_id: playback.body.item.album.uri,
+        album_id: playback.body.item.album.uri.slice(14),
         album_name: playback.body.item.album.name,
         track_img: playback.body.item.album.images[0].url,
       };
