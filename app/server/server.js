@@ -122,10 +122,11 @@ app.post(
   asyncHandler(async (req, res) => {
     //console.log(req.body.accessToken);
     //console.log(req.body);
-    const access_token = req.body.accessToken;
+    const access_token = await req.body.accessToken;
     // var recent_tracks = await createRecentPlaylist(access_token);
     // console.log(recent_tracks)
     const state = await getPlayback(access_token);
+
     console.log(state);
 
     // if status code is good and not paused and past a certain percentage of the song
@@ -164,9 +165,11 @@ app.post(
           stack[1].progress_ms = state.progress_ms;
           stack[0].added = false;
           stack[1].added = false;
-        } else if (state.progress_ms > stack[1].progress_ms + 10500) {
+        } else if (state.progress_ms > stack[1].progress_ms + 20000) {
           stack[0].progress = state.progress;
           stack[1].progress = state.progress;
+          stack[0].progress_ms = state.progress_ms;
+          stack[1].progress_ms = state.progress_ms;
           stack[0].added = false;
           stack[1].added = false;
         } else {
@@ -190,7 +193,6 @@ app.post(
           added: false,
         });
       }
-
 
       if (stack[1].progress - stack[0].progress > 0.35 && !stack[1].added) {
         stack[1].added = true;
@@ -243,10 +245,10 @@ app.post("/refresh", (req, res) => {
   spotifyApi
     .refreshAccessToken()
     .then((data) => {
-      //console.log(data.body);
+      console.log("Refresh End Point Hit");
       res.json({
-        accessToken: data.body.accessToken,
-        expiresIn: data.body.expiresIn,
+        accessToken: data.body.access_token,
+        expiresIn: data.body.expires_in,
       });
     })
     .catch((err) => {

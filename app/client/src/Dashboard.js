@@ -6,10 +6,15 @@ import "./Dashboard.css";
 export default function Dashboard({ code }) {
   const accessToken = useAuth(code);
   //const [playlists, setPlaylists] = useState([]);
-  //const [tracks, setTracks] = useState({});
+  //const [token, setToken] = useState(accessToken);
   const [currTrack, setcurrTrack] = useState("");
+  //console.log(token);
   useEffect(() => {
-    if (!accessToken) return;
+    console.log(accessToken);
+    if (!accessToken) {
+      console.log("useEffect in Dashboard returned");
+      return;
+    }
     const interval = setInterval(() => {
       axios
         .post("http://localhost:3001/recently-played", {
