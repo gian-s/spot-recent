@@ -1,6 +1,14 @@
-.centered {
-    height: 100; /* Magic here */
+.trackImg {
+     /* Magic here */
     display: flex;
     justify-content: center;
     align-items: center;
+    text-align: bottom;
+    height: 640;
+    width:640
+  }
+
+  .trackInfo{
+    width: 130;
+    text-align: center;
   }

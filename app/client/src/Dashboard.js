@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import useAuth from "./useAuth";
 import axios from "axios";
 import "./Dashboard.css";
+import trackImage from "./track.jpg";
 
 export default function Dashboard({ code }) {
   const accessToken = useAuth(code);
@@ -27,7 +28,7 @@ export default function Dashboard({ code }) {
         .catch((error) => {
           console.log(error);
         });
-    }, 10000); //every 5 min
+    }, 10000); //every 10 seconds
     return () => clearInterval(interval);
   }, [accessToken, currTrack]);
 
@@ -35,8 +36,9 @@ export default function Dashboard({ code }) {
   //const alt_img
 
   return (
-    <div className="centered">
-      <img src={currTrack} alt="track" height={450} width={450} />
+    <div className="trackImg">
+      <img src={trackImage} alt="track" height={450} width={450} />
+      Hello
     </div>
   );
 }
