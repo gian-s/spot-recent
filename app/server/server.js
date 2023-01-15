@@ -164,9 +164,11 @@ app.post(
           stack[1].progress_ms = state.progress_ms;
           stack[0].added = false;
           stack[1].added = false;
-        } else if (state.progress_ms > stack[1].progress_ms + 10500) {
+        } else if (state.progress_ms > stack[1].progress_ms + 15000) {
           stack[0].progress = state.progress;
           stack[1].progress = state.progress;
+          stack[0].progress_ms = state.progress_ms;
+          stack[1].progress_ms = state.progress_ms;
           stack[0].added = false;
           stack[1].added = false;
         } else {
@@ -190,7 +192,6 @@ app.post(
           added: false,
         });
       }
-
 
       if (stack[1].progress - stack[0].progress > 0.35 && !stack[1].added) {
         stack[1].added = true;
