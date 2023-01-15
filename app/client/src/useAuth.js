@@ -33,9 +33,10 @@ export default function useAuth(code) {
           refreshToken,
         })
         .then((res) => {
+          console.log(res.data.accessToken);
           setAccessToken(res.data.accessToken);
           setExpiresIn(res.data.expiresIn);
-          //console.log(res.data);
+          console.log("new token added");
         })
         .catch(() => {
           window.location = "/";
