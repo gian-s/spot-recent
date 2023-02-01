@@ -1,6 +1,22 @@
-.centered {
-    height: 100; /* Magic here */
+.container{
+    height: 400px;
+    position: relative;
+  
+}
+
+/* .centered-image {
+    margin:0px;
+    position:absolute;
+    top:50%;
+    left:50%;
+    -ms-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
+
+  } */
+
+  .centered-image {
     display: flex;
     justify-content: center;
     align-items: center;
+    height: 700px;
   }
